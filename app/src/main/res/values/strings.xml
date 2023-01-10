@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">DataStore Example</string>
+
+    <string name="save">Save</string>
+    <string name="input_hint">write something here</string>
+
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+</resources>
