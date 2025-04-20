@@ -1,41 +1,42 @@
 package com.jumrukovski.datastoreexample
 
-import android.content.Context
-import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore(name = "preferences")
-
-class PreferencesManager(private val context: Context) {
+class PreferencesManager(private val dataStore: DataStore<Preferences>) {
 
     companion object {
-        val KEY_STRING = stringPreferencesKey("keyString")
-        val KEY_BOOLEAN = booleanPreferencesKey("keyBoolean")
+        val KEY_NAME = stringPreferencesKey("keyString")
+        val KEY_IS_STUDENT = booleanPreferencesKey("keyBoolean")
     }
 
-    val preferencesFlow: Flow<Preferences> = context.dataStore.data.catch {
+    val preferencesFlow: Flow<AppPreferences> = dataStore.data.catch {
         emit(emptyPreferences())
-    }.map { preferences ->
-        val valueString: String = preferences[KEY_STRING] ?: ""
-        val valueBoolean: Boolean = preferences[KEY_BOOLEAN] ?: false
+    }.map { appPreferences ->
+        val name: String = appPreferences[KEY_NAME] ?: ""
+        val isStudent: Boolean = appPreferences[KEY_IS_STUDENT] ?: false
 
-        Preferences(valueString,valueBoolean)
+        AppPreferences(name, isStudent)
     }
 
-    suspend fun updateStringValue(valueString: String) {
-        context.dataStore.edit { preferences ->
-            preferences[KEY_STRING] = valueString
+    suspend fun updateName(name: String) {
+        dataStore.edit { appPreferences ->
+            appPreferences[KEY_NAME] = name
         }
     }
 
-    suspend fun updateBooleanValue(valueBoolean: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[KEY_BOOLEAN] = valueBoolean
+    suspend fun updateIsStudent(isStudent: Boolean) {
+        dataStore.edit { appPreferences ->
+            appPreferences[KEY_IS_STUDENT] = isStudent
         }
     }
 
-    data class Preferences(val keyString: String, val keyBoolean: Boolean)
+    data class AppPreferences(val name: String = "", val isStudent: Boolean = false)
 }

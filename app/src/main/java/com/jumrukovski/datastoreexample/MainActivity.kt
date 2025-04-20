@@ -4,68 +4,66 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.jumrukovski.datastoreexample.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var preferencesManager: PreferencesManager
+
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        preferencesManager = PreferencesManager(this@MainActivity)
-
-        setupObservers()
-        setupClickListeners()
-    }
-
-    private fun setupObservers() {
         lifecycleScope.launch {
-            preferencesManager.preferencesFlow.collect { preferences ->
-                with(binding) {
-                    input.setText(preferences.keyString)
-                    when (preferences.keyBoolean) {
-                        true -> radioYes
-                        false -> radioNo
-                    }.apply {
-                        isChecked = true
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.appPreferences.collectLatest { appPreferences ->
+                    with(binding) {
+                        input.setText(appPreferences.name)
+
+                        val view = when (appPreferences.isStudent) {
+                            true -> radioYes
+                            false -> radioNo
+                        }
+
+                        view.isChecked = true
                     }
                 }
             }
         }
+
+        setupClickListeners()
     }
 
     private fun setupClickListeners() {
         with(binding) {
             button.setOnClickListener {
                 hideKeyboard(input)
-                lifecycleScope.launch(Dispatchers.IO) {
-                    preferencesManager.updateStringValue(input.text.toString().trim())
-                }
+                mainViewModel.updateStringValue(input.text.toString())
             }
-            radioYes.setOnClickListener {
-                lifecycleScope.launch(Dispatchers.IO) {
-                    preferencesManager.updateBooleanValue(true)
-                }
-            }
-            radioNo.setOnClickListener {
-                lifecycleScope.launch(Dispatchers.IO) {
-                    preferencesManager.updateBooleanValue(false)
-                }
-            }
+            radioYes.setOnClickListener { mainViewModel.updateBooleanValue(true) }
+            radioNo.setOnClickListener { mainViewModel.updateBooleanValue(false) }
         }
     }
 
     private fun hideKeyboard(view: View) {
-        val inputMethodManager =
-            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+        (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).apply {
+            hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 }

@@ -2,7 +2,8 @@
     <string name="app_name">DataStore Example</string>
 
     <string name="save">Save</string>
-    <string name="input_hint">write something here</string>
+    <string name="input_hint">write name here</string>
+    <string name="is_student">Is Student</string>
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
