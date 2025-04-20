@@ -1,7 +1,11 @@
 package com.jumrukovski.datastoreexample
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -9,30 +13,30 @@ import kotlinx.coroutines.flow.map
 class PreferencesManager(private val dataStore: DataStore<Preferences>) {
 
     companion object {
-        val KEY_STRING = stringPreferencesKey("keyString")
-        val KEY_BOOLEAN = booleanPreferencesKey("keyBoolean")
+        val KEY_NAME = stringPreferencesKey("keyString")
+        val KEY_IS_STUDENT = booleanPreferencesKey("keyBoolean")
     }
 
     val preferencesFlow: Flow<AppPreferences> = dataStore.data.catch {
         emit(emptyPreferences())
     }.map { appPreferences ->
-        val valueString: String = appPreferences[KEY_STRING] ?: ""
-        val valueBoolean: Boolean = appPreferences[KEY_BOOLEAN] ?: false
+        val name: String = appPreferences[KEY_NAME] ?: ""
+        val isStudent: Boolean = appPreferences[KEY_IS_STUDENT] ?: false
 
-        AppPreferences(valueString, valueBoolean)
+        AppPreferences(name, isStudent)
     }
 
-    suspend fun updateStringValue(valueString: String) {
+    suspend fun updateName(name: String) {
         dataStore.edit { appPreferences ->
-            appPreferences[KEY_STRING] = valueString
+            appPreferences[KEY_NAME] = name
         }
     }
 
-    suspend fun updateBooleanValue(valueBoolean: Boolean) {
+    suspend fun updateIsStudent(isStudent: Boolean) {
         dataStore.edit { appPreferences ->
-            appPreferences[KEY_BOOLEAN] = valueBoolean
+            appPreferences[KEY_IS_STUDENT] = isStudent
         }
     }
 
-    data class AppPreferences(val keyString: String, val keyBoolean: Boolean)
+    data class AppPreferences(val name: String = "", val isStudent: Boolean = false)
 }

@@ -4,10 +4,16 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.jumrukovski.datastoreexample.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -18,27 +24,30 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        mainViewModel.getAppPreferences()
-        setupObservers()
-        setupClickListeners()
-    }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.appPreferences.collectLatest { appPreferences ->
+                    with(binding) {
+                        input.setText(appPreferences.name)
 
-    private fun setupObservers() {
-        mainViewModel.appPreferences.observe(this) { appPreferences ->
-            with(binding) {
-                input.setText(appPreferences.keyString)
+                        val view = when (appPreferences.isStudent) {
+                            true -> radioYes
+                            false -> radioNo
+                        }
 
-                val view = when (appPreferences.keyBoolean) {
-                    true -> radioYes
-                    false -> radioNo
+                        view.isChecked = true
+                    }
                 }
-
-                view.isChecked = true
             }
         }
+
+        setupClickListeners()
     }
 
     private fun setupClickListeners() {

@@ -3,28 +3,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/margin"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
+    android:padding="@dimen/margin"
     tools:context=".MainActivity">
 
     <EditText
         android:id="@+id/input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
+        android:layout_margin="16dp"
         android:hint="@string/input_hint"
         android:importantForAutofill="no"
-        android:inputType="textMultiLine"/>
+        android:inputType="textMultiLine"
+        android:textColor="@color/black" />
 
-    <Button
-        android:id="@+id/button"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/save" />
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/black"
+        android:text="@string/is_student"
+        android:textSize="16sp" />
 
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:orientation="horizontal">
 
         <androidx.appcompat.widget.AppCompatRadioButton
@@ -40,5 +48,12 @@
             android:text="@string/no" />
 
     </RadioGroup>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:text="@string/save" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>
